@@ -29,7 +29,7 @@
     },
     {
       "type": "shell",
-      "inline": ["chmod +x /etc/init.d/mystartup.sh"],
+      "inline": ["chmod +x /etc/init.d/mystartup.sh", "ln -s /etc/init.d/mystartup.sh /etc/rc0.d/"],
       "execute_command" : "sudo {{.Path}}"
     }
   ]
