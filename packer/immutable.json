@@ -1,0 +1,36 @@
+{
+  "builders": [
+    {
+      "type": "googlecompute",
+      "project_id": "week-3-239117",
+      "image_name": "reddit-application-{{timestamp}}",
+      "source_image": "ubuntu-1604-xenial-v20190430",
+      "zone": "europe-west1-d",
+      "ssh_username": "appuser",
+      "machine_type": "f1-micro",
+      "tags": ["puma-server"]
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "scripts/install_ruby.sh"
+    },
+    {
+      "type": "shell",
+      "script": "scripts/install_mongodb.sh",
+      "execute_command": "sudo {{.Path}}"
+    },
+    {
+      "type": "shell",
+      "script": "files/deploy.sh",
+      "execute_command": "sudo {{.Path}}"
+    },
+    {
+      "type": "shell",
+      "inline": ["chmod +x /etc/init.d/mystartup.sh"],
+      "execute_command" : "sudo {{.Path}}"
+    }
+  ]
+}
