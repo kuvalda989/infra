@@ -3,3 +3,8 @@
 *.tfstate.backup
 *.tfvars
 .terraform/
+terraform.exe
+terraform.d/
+application_default_credentials.json
+*.pub
+appuser
