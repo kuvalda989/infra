@@ -1,35 +1,39 @@
 provider "google" {
   credentials = "${file("application_default_credentials.json")}"
-  project = "infra-239715"
-  region = "europe-west1"
+  project     = "${var.project}"
+  region      = "${var.region}"
 }
 
 resource "google_compute_instance" "app" {
-  name = "reddit-app"
+  name         = "reddit-app"
   machine_type = "g1-small"
-  zone = "europe-west1-b"
-  tags = ["reddit-app"]
+  zone         = "europe-west1-b"
+  tags         = ["reddit-app"]
+
   boot_disk {
     initialize_params {
-      image = "reddit-base-1557116379"
+      image = "${var.disk_image}"
     }
   }
+
   metadata {
-    sshKeys = "appuser:${file("appuser.pub")}"
+    sshKeys = "appuser:${file(var.public_key_path)}"
   }
+
   network_interface {
-    network = "default"
-    access_config{}
+    network       = "default"
+    access_config = {}
   }
+
   connection {
-    type = "ssh"
-    user = "appuser"
-    agent = false
-    private_key = "${file("appuser")}"
+    type        = "ssh"
+    user        = "appuser"
+    agent       = false
+    private_key = "${file(var.private_key_path)}"
   }
 
   provisioner "file" {
-    source = "files/puma.service"
+    source      = "files/puma.service"
     destination = "/tmp/puma.service"
   }
 
@@ -38,14 +42,15 @@ resource "google_compute_instance" "app" {
   }
 }
 
-
 resource "google_compute_firewall" "firewall_puma" {
-  name = "allow-puma-default"
+  name    = "allow-puma-default"
   network = "default"
+
   allow {
     protocol = "tcp"
-    ports = ["9292"]
+    ports    = ["9292"]
   }
+
   source_ranges = ["0.0.0.0/0"]
-  target_tags = ["reddit-app"]
+  target_tags   = ["reddit-app"]
 }
