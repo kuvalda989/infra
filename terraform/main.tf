@@ -4,6 +4,13 @@ provider "google" {
   region      = "${var.region}"
 }
 
+terraform {
+  backend "gcs" {
+    bucket  = "terraform-dp"
+    prefix  = "terraform/state"
+  }
+}
+
 module "app" {
   source = "modules/app"
   public_key_path = "${var.public_key_path}"
