@@ -1,0 +1,21 @@
+{
+  "builders": [
+    {
+      "type": "googlecompute",
+      "project_id": "infra-239715",
+      "image_name": "db-{{timestamp}}",
+      "source_image": "ubuntu-1604-xenial-v20190430",
+      "zone": "europe-west1-b",
+      "ssh_username": "appuser",
+      "machine_type": "f1-micro",
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "scripts/install_mongodb.sh",
+      "execute_command": "sudo {{.Path}}"
+    }
+  ]
+}
