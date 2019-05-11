@@ -14,7 +14,29 @@
   "provisioners": [
     {
       "type": "ansible",
-      "playbook_file": "../ansible/reddit_app.yml"
+      "playbook_file": "../ansible/reddit_ruby.yml"
+    },
+
+    {
+      "type": "ansible",
+      "playbook_file": "../ansible/reddit_mongodb.yml",
+      "extra_arguments": [
+        "--sudo"
+      ]
+    },
+
+    {
+      "type": "ansible",
+      "playbook_file": "../ansible/deploy_reddit.yml"
+    },
+
+    {
+      "type": "ansible",
+      "playbook_file": "../ansible/reddit_startup.yml",
+      "extra_arguments": [
+        "--sudo"
+      ]
     }
+
   ]
 }

@@ -1,0 +1,26 @@
+
+- name: copy to remote and start application
+  hosts: all
+  gather_facts: no
+  remote_user: root
+
+
+  tasks:
+
+  - name: copy
+    copy:
+      src: files/puma.service
+      dest: /etc/systemd/system/puma.service
+
+
+  - name: create  db_config
+    file:
+      path: "/home/appuser/db_config"
+      state: touch
+
+  - name: start application
+    systemd:
+      name: puma
+      enabled: yes
+      state: started
+      masked: no

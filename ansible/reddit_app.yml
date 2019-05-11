@@ -3,6 +3,7 @@
   hosts: all
   gather_facts: no
   become: yes
+  remote_user: appuser
 
   tasks:
   - name: Install ruby and rubygems and required packages
@@ -26,7 +27,7 @@
 
   tasks:
 
-  - name: Install repo
+  - name: Install repo key
     apt_key:
       keyserver: hkp://keyserver.ubuntu.com:80
       id: EA312927
@@ -44,6 +45,8 @@
 - name: "Reddit App: Deploy application"
   hosts: all
   gather_facts: no
+  remote_user: appuser
+
 
   tasks:
   - name: Remove me after adding real things
