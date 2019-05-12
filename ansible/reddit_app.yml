@@ -1,89 +1,80 @@
-# Setup and configure ruby things for reddit app
-- name: "Reddit App: Configure app environment"
+---
+
+- name: Configure hosts and deploy application
   hosts: all
-  gather_facts: no
-  become: yes
-  remote_user: appuser
-
-  tasks:
-  - name: Install ruby and rubygems and required packages
-    apt: "name={{ item }} state=present"
-    with_items:
-      - ruby-full
-      - ruby-dev
-      - build-essential
-
-  - name: Install Ruby bundler
-    gem:
-      name: bundler
-      state: present
-      user_install: no
-
-# Work play for install mongodb
-- name: "Reddit App: Install mongodb"
-  hosts: all
-  gather_facts: no
-  remote_user: root
+  vars:
+    mongo_bind_ip: 0.0.0.0
+    db_host: 10.132.15.193
 
   tasks:
 
-  - name: Install repo key
-    apt_key:
-      keyserver: hkp://keyserver.ubuntu.com:80
-      id: EA312927
-
-  - name: Install repo
-    shell: 'echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" > /etc/apt/sources.list.d/mongodb-org-3.2.list'
-
-
-  - name: Install mongodb package
-    apt: "name=mongodb-org state=present update_cache=yes"
-
-
-
-# Deploy reddit app
-- name: "Reddit App: Deploy application"
-  hosts: all
-  gather_facts: no
-  remote_user: appuser
-
-
-  tasks:
-  - name: Remove me after adding real things
-    git:
-      repo: 'https://github.com/Artemmkin/reddit.git'
-      dest: ~/reddit
-
-  - name: install reddit
-    shell: 'cd reddit && bundle install'
-
-  - name: update gems
-    bundler:
-      state: latest
-      chdir: ~/reddit
-
-- name: copy to remote and start application
-  hosts: all
-  gather_facts: no
-  remote_user: root
-
-
-  tasks:
+  - name: Change mongo config file
+    become: true
+    template:
+      src: templates/mongod.conf.j2
+      dest: /etc/mongod.conf
+      mode: 0644
+    tags: db-tag
+    notify: restart mongod
 
   - name: copy
+    become: true
     copy:
       src: files/puma.service
       dest: /etc/systemd/system/puma.service
+    notify: reload puma
+    tags: app-tag
 
 
   - name: create  db_config
+    become: true
     file:
       path: "/home/appuser/db_config"
       state: touch
+    tags: app-tag
 
-  - name: start application
+  - name: Add config for DB connection
+    template:
+      src: templates/db_config.j2
+      dest: /home/appuser/db_config
+    tags: app-tag
+
+  - name: enable puma
+    become: true
     systemd:
       name: puma
       enabled: yes
       state: started
       masked: no
+    tags: app-tag
+
+  - name: Clone reddit from github
+    git:
+      repo: 'https://github.com/Artemmkin/reddit.git'
+      dest: ~/reddit
+    tags: deploy-tag
+
+  - name: install reddit
+    shell: 'cd reddit && /home/appuser/.rvm/rubies/ruby-2.4.1/lib/ruby/gems/2.4.0/bin/bundle install'
+    tags: deploy-tag
+
+  - name: update gems
+    bundler:
+      state: latest
+      chdir: ~/reddit
+    notify: restart puma
+    tags: deploy-tag
+
+
+  handlers:
+  - name: restart mongod
+    become: true
+    service: name=mongod state=restarted
+
+  - name: reload puma
+    become: true
+    systemd: name=puma state=reloaded
+
+  - name: restart puma
+    become: true
+    systemd: name=puma state=restarted

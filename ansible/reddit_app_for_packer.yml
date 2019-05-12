@@ -1,0 +1,89 @@
+# Setup and configure ruby things for reddit app
+- name: "Reddit App: Configure app environment"
+  hosts: all
+  gather_facts: no
+  become: yes
+  remote_user: appuser
+
+  tasks:
+  - name: Install ruby and rubygems and required packages
+    apt: "name={{ item }} state=present"
+    with_items:
+      - ruby-full
+      - ruby-dev
+      - build-essential
+
+  - name: Install Ruby bundler
+    gem:
+      name: bundler
+      state: present
+      user_install: no
+
+# Work play for install mongodb
+- name: "Reddit App: Install mongodb"
+  hosts: all
+  gather_facts: no
+  remote_user: root
+
+  tasks:
+
+  - name: Install repo key
+    apt_key:
+      keyserver: hkp://keyserver.ubuntu.com:80
+      id: EA312927
+
+  - name: Install repo
+    shell: 'echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" > /etc/apt/sources.list.d/mongodb-org-3.2.list'
+
+
+  - name: Install mongodb package
+    apt: "name=mongodb-org state=present update_cache=yes"
+
+
+
+# Deploy reddit app
+- name: "Reddit App: Deploy application"
+  hosts: all
+  gather_facts: no
+  remote_user: appuser
+
+
+  tasks:
+  - name: Remove me after adding real things
+    git:
+      repo: 'https://github.com/Artemmkin/reddit.git'
+      dest: ~/reddit
+
+  - name: install reddit
+    shell: 'cd reddit && bundle install'
+
+  - name: update gems
+    bundler:
+      state: latest
+      chdir: ~/reddit
+
+- name: copy to remote and start application
+  hosts: all
+  gather_facts: no
+  remote_user: root
+
+
+  tasks:
+
+  - name: copy
+    copy:
+      src: files/puma.service
+      dest: /etc/systemd/system/puma.service
+
+
+  - name: create  db_config
+    file:
+      path: "/home/appuser/db_config"
+      state: touch
+
+  - name: start application
+    systemd:
+      name: puma
+      enabled: yes
+      state: started
+      masked: no

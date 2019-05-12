@@ -8,3 +8,4 @@ terraform.d/
 application_default_credentials.json
 *.pub
 appuser
+*.retry
