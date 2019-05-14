@@ -1,0 +1,9 @@
+---
+- name: install python-apt
+  hosts: app
+  become: true
+  tasks:
+  - name: install python-application
+    apt:
+      name: python-apt
+      state: latest

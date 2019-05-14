@@ -10,3 +10,4 @@ application_default_credentials.json
 appuser
 *.retry
 infra-239715-8190fc9ae284.json
+*.nginx

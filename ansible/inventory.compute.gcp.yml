@@ -3,10 +3,9 @@ projects:
   - infra-239715         # Id of your gcp project
 regions:                        # regions from your project you want to fetch inventory from (you can also use zones instead of regions if you target one or several specific zones)
   - europe-west1-b
-hostnames:
-  - name
-keyed_groups:
-  - key: zone
+groups:
+  db: "'db' in name"
+  app: "'app' in name"
 filters: []
 auth_kind: serviceaccount       # gcp authentication kind. with service account you should provide the service account json key file to authenticate
 service_account_file: infra-239715-8190fc9ae284.json   # Service account json keyfile

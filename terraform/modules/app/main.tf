@@ -2,7 +2,7 @@ resource "google_compute_instance" "app" {
   name = "reddit-app"
   machine_type = "g1-small"
   zone = "europe-west1-b"
-  tags = ["reddit-app", "default-allow-ssh"]
+  tags = ["reddit-app", "default-allow-ssh", "allow-http"]
   boot_disk {
     initialize_params {
       image = "${var.app_disk_image}"
@@ -30,6 +30,19 @@ resource "google_compute_firewall" "firewall_puma" {
 
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["reddit-app"]
+}
+
+resource "google_compute_firewall" "firewall_http" {
+  name    = "allow-http"
+  network = "default"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["allow-http"]
 }
 
 resource "google_compute_address" "app_ip" {
