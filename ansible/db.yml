@@ -2,7 +2,12 @@
 - name: Configure MongoDB
   hosts: db
   become: true
+  gather_facts: false
   vars:
     mongo_bind_ip: 0.0.0.0
+  pre_tasks:
+    - name: Install python for Ansible
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+      changed_when: false
   roles:
     - db

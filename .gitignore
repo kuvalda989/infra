@@ -13,4 +13,5 @@ infra-239715-8190fc9ae284.json
 *.nginx
 .vagrant/
 *.logs
+*.log
 infra-239715-8190fc9ae284.json

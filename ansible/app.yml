@@ -2,7 +2,12 @@
 - name: Configure App
   hosts: app
   become: true
+  gather_facts: false
   vars:
     db_host: 10.132.15.197
+  pre_tasks:
+    - name: Install python for Ansible
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+      changed_when: false
   roles:
     - app
